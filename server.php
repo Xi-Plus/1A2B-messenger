@@ -69,7 +69,7 @@ if ($method == 'GET' && $_GET['hub_mode'] == 'subscribe' &&  $_GET['hub_verify_t
 					$data["count"]++;
 					$stat=checkans($data["ans"], $guessarr);
 					$data["guess"][]=$guess;
-					$data["text"].="\n".$data["count"]." ".$guess." ".$stat[0]."A".$stat[1]."B";
+					$data["text"].="\n".$guess." ".$stat[0]."A".$stat[1]."B";
 					$res="";
 					if ($stat[0]==4) {
 						$res.="你花了 ".$data["count"]." 次猜中\n".$data["text"]."\n\n已開始新遊戲！";
