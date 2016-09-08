@@ -1,22 +1,24 @@
 <?php
-function checkdiff($arr) {
-	return ($arr[0]!=$arr[1]&&$arr[0]!=$arr[2]&&$arr[0]!=$arr[3]&&$arr[1]!=$arr[2]&&$arr[1]!=$arr[3]&&$arr[2]!=$arr[3]);
-}
-function randomans() {
-	$arr=array(0,0,0,0);
-	while (!checkdiff($arr)) {
-		$arr[0]=rand(0,9);
-		$arr[1]=rand(0,9);
-		$arr[2]=rand(0,9);
-		$arr[3]=rand(0,9);
+function checkdiff($arr, $len) {
+	for ($i=0; $i < $len-1; $i++) { 
+		for ($j=$i+1; $j < $len; $j++) { 
+			if ($arr[$i] == $arr[$j]) {
+				return false;
+			}
+		}
 	}
-	return $arr;
+	return true;
 }
-function checkans($ans, $gue) {
+function randomans($len) {
+	$arr=array(0,1,2,3,4,5,6,7,8,9);
+	shuffle($arr);
+	return array_slice($arr, 0, $len);
+}
+function checkans($ans, $gue, $len) {
 	$A=0;
 	$B=0;
-	for ($i=0; $i < 4; $i++) { 
-		for ($j=0; $j < 4; $j++) {
+	for ($i=0; $i < $len; $i++) { 
+		for ($j=0; $j < $len; $j++) {
 			if ($ans[$i]==$gue[$j]) {
 				if ($i==$j) $A++;
 				else $B++;

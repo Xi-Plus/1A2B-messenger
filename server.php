@@ -18,11 +18,9 @@ if ($method == 'GET' && $_GET['hub_mode'] == 'subscribe' &&  $_GET['hub_verify_t
 			$user_id = $messaging['sender']['id'];
 			$data = file_get_contents("data/".$user_id.".json");
 			if (!$data) {
-				$data = array(
+				$data=array(
 					"count"=> 0,
-					"guess"=> array(),
-					"text"=> "",
-					"ans"=>randomans()
+					"text"=> ""
 				);
 			} else {
 				$data = json_decode($data, true);
@@ -33,33 +31,37 @@ if ($method == 'GET' && $_GET['hub_mode'] == 'subscribe' &&  $_GET['hub_verify_t
 					if ($data["count"]==0) {
 						$messageData=array(
 							"recipient"=>array("id"=>$user_id),
-							"message"=>array("text"=>"遊戲開始！")
+							"message"=>array("text"=>"已開始新遊戲！將根據輸入決定答案數字個數")
 						);
 					} else {
 						$messageData=array(
 							"recipient"=>array("id"=>$user_id),
-							"message"=>array("text"=>"你猜了 ".$data["count"]." 次就放棄了，答案是".implode($data["ans"])."\n".$data["text"]."\n\n已開始新遊戲！")
+							"message"=>array("text"=>"你猜了 ".$data["count"]." 次就放棄了，答案是".implode($data["ans"])."\n".$data["text"]."\n\n已開始新遊戲！將根據輸入決定答案數字個數")
 						);
 					}
-					$data = array(
+					$data=array(
 						"count"=> 0,
-						"guess"=> array(),
-						"text"=> "",
-						"ans"=>randomans()
+						"text"=> ""
 					);
 				}
 			} else if (isset($messaging['message'])) {
 				$guess = $messaging['message']['text'];
+				$guesslen = strlen($guess);
 				$guessarr = str_split($guess);
-				if (!preg_match("/^\d{4}$/", $guess)) {
+				if (!preg_match("/^\d{1,10}$/", $guess)) {
 					$messageData=array(
 						"recipient"=>array("id"=>$user_id),
-						"message"=>array("text"=>"你的答案不符合格式，必須是4個不重複數字\n".$data["text"])
+						"message"=>array("text"=>"答案不符合格式，必須是1~10個不重複數字\n".$data["text"])
 					);
-				} else if(!checkdiff($guessarr)) {
+				} else if(!checkdiff($guessarr, $guesslen)) {
 					$messageData=array(
 						"recipient"=>array("id"=>$user_id),
 						"message"=>array("text"=>"數字不可重複！\n".$data["text"])
+					);
+				} else if($data["count"]!=0 && $data["len"]!=$guesslen) {
+					$messageData=array(
+						"recipient"=>array("id"=>$user_id),
+						"message"=>array("text"=>"答案不符合目前規則，必須是".$data["len"]."個數字\n".$data["text"])
 					);
 				} else if(in_array($guess, $data["guess"])) {
 					$messageData=array(
@@ -67,21 +69,27 @@ if ($method == 'GET' && $_GET['hub_mode'] == 'subscribe' &&  $_GET['hub_verify_t
 						"message"=>array("text"=>"這個答案你猜過了！\n".$data["text"])
 					);
 				} else {
-					if ($data["count"]==0) {
-						$data["time"]=time();
-					}
-					$data["count"]++;
-					$stat=checkans($data["ans"], $guessarr);
-					$data["guess"][]=$guess;
-					$data["text"].="\n".$guess." ".$stat[0]."A".$stat[1]."B";
 					$res="";
-					if ($stat[0]==4) {
-						$res.="你花了 ".timedifftext(time()-$data["time"])." 在 ".$data["count"]." 次猜中\n".$data["text"]."\n\n已開始新遊戲！";
-						$data = array(
+					if ($data["count"]==0) {
+						$data=array(
 							"count"=> 0,
 							"guess"=> array(),
 							"text"=> "",
-							"ans"=>randomans()
+							"time"=>time(),
+							"ans"=>randomans($guesslen),
+							"len"=>$guesslen
+						);
+						$res.="已開始 ".$data["len"]." 個數字的遊戲\n";
+					}
+					$data["count"]++;
+					$stat=checkans($data["ans"], $guessarr, $data["len"]);
+					$data["guess"][]=$guess;
+					$data["text"].="\n".$guess." ".$stat[0]."A".$stat[1]."B";
+					if ($stat[0]==$data["len"]) {
+						$res.="你花了 ".timedifftext(time()-$data["time"])." 在 ".$data["count"]." 次猜中\n".$data["text"]."\n\n已開始新遊戲！將根據輸入決定答案數字個數";
+						$data=array(
+							"count"=> 0,
+							"text"=> ""
 						);
 					} else {
 						$res.="你已花了 ".timedifftext(time()-$data["time"])." 猜了 ".$data["count"]." 次\n".$data["text"];
