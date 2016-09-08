@@ -8,6 +8,7 @@ if ($method == 'GET' && $_GET['hub_mode'] == 'subscribe' &&  $_GET['hub_verify_t
 	$inputJSON = file_get_contents('php://input');
 	$input = json_decode($inputJSON, true);
 	require(__DIR__."/function/1a2b.php");
+	require(__DIR__."/function/time.php");
 	foreach ($input['entry'] as $entry) {
 		foreach ($entry['messaging'] as $messaging) {
 			$page_id = $messaging['recipient']['id'];
@@ -37,7 +38,7 @@ if ($method == 'GET' && $_GET['hub_mode'] == 'subscribe' &&  $_GET['hub_verify_t
 					} else {
 						$messageData=array(
 							"recipient"=>array("id"=>$user_id),
-							"message"=>array("text"=>"你猜了 ".$data["count"]." 次就放棄了，答案是".implode($data["ans"])."\n".$data["text"])
+							"message"=>array("text"=>"你猜了 ".$data["count"]." 次就放棄了，答案是".implode($data["ans"])."\n".$data["text"]."\n\n已開始新遊戲！")
 						);
 					}
 					$data = array(
@@ -66,13 +67,16 @@ if ($method == 'GET' && $_GET['hub_mode'] == 'subscribe' &&  $_GET['hub_verify_t
 						"message"=>array("text"=>"這個答案你猜過了！\n".$data["text"])
 					);
 				} else {
+					if ($data["count"]==0) {
+						$data["time"]=time();
+					}
 					$data["count"]++;
 					$stat=checkans($data["ans"], $guessarr);
 					$data["guess"][]=$guess;
 					$data["text"].="\n".$guess." ".$stat[0]."A".$stat[1]."B";
 					$res="";
 					if ($stat[0]==4) {
-						$res.="你花了 ".$data["count"]." 次猜中\n".$data["text"]."\n\n已開始新遊戲！";
+						$res.="你花了 ".timedifftext(time()-$data["time"])." 在 ".$data["count"]." 次猜中\n".$data["text"]."\n\n已開始新遊戲！";
 						$data = array(
 							"count"=> 0,
 							"guess"=> array(),
@@ -80,7 +84,7 @@ if ($method == 'GET' && $_GET['hub_mode'] == 'subscribe' &&  $_GET['hub_verify_t
 							"ans"=>randomans()
 						);
 					} else {
-						$res.="你已猜了 ".$data["count"]." 次\n".$data["text"];
+						$res.="你已花了 ".timedifftext(time()-$data["time"])." 猜了 ".$data["count"]." 次\n".$data["text"];
 					}
 					$messageData=array(
 						"recipient"=>array("id"=>$user_id),
