@@ -46,6 +46,7 @@ if ($method == 'GET' && $_GET['hub_mode'] == 'subscribe' &&  $_GET['hub_verify_t
 				}
 			} else if (isset($messaging['message'])) {
 				$guess = $messaging['message']['text'];
+				$guess = strtr($guess, "qwertyuiop", "1234567890");
 				$guesslen = strlen($guess);
 				$guessarr = str_split($guess);
 				if (!preg_match("/^\d{1,10}$/", $guess)) {
