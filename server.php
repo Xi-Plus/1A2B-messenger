@@ -79,7 +79,7 @@ if ($method == 'GET' && $_GET['hub_mode'] == 'subscribe' &&  $_GET['hub_verify_t
 							"ans"=>randomans($guesslen),
 							"len"=>$guesslen
 						);
-						$res.="已開始 ".$data["len"]." 個數字的遊戲\n";
+						$res.="已開始 ".$data["len"]." 個數字的遊戲，欲重玩請在輸入框左方選單選擇\n";
 					}
 					$data["count"]++;
 					$stat=checkans($data["ans"], $guessarr, $data["len"]);
