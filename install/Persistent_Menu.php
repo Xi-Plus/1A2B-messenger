@@ -1,5 +1,5 @@
 <?php
-require(__DIR__."/config/config.php");
+require(__DIR__."/../config/config.php");
 $commend = 'curl -X POST -H "Content-Type: application/json" -d \'{
   "setting_type" : "call_to_actions",
   "thread_state" : "existing_thread",
