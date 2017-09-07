@@ -16,7 +16,7 @@ if ($method == 'GET' && $_GET['hub_mode'] == 'subscribe' &&  $_GET['hub_verify_t
 				continue;
 			}
 			$user_id = $messaging['sender']['id'];
-			$data = file_get_contents("data/".$user_id.".json");
+			$data = file_get_contents(__DIR__."/data/".$user_id.".json");
 			if (!$data) {
 				$data=array(
 					"count"=> 0,
@@ -106,7 +106,7 @@ if ($method == 'GET' && $_GET['hub_mode'] == 'subscribe' &&  $_GET['hub_verify_t
 					"message"=>array("text"=>"Something went wrong!")
 				);
 			}
-			file_put_contents("data/".$user_id.".json", json_encode($data));
+			file_put_contents(__DIR__."/data/".$user_id.".json", json_encode($data));
 			$commend = 'curl -X POST -H "Content-Type: application/json" -d \''.json_encode($messageData,JSON_HEX_APOS|JSON_HEX_QUOT).'\' "https://graph.facebook.com/v2.7/me/messages?access_token='.$cfg['page_token'].'"';
 			system($commend);
 		}
